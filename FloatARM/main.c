@@ -39,7 +39,7 @@
 
 int main(void) {
   SystemInit();
-	uartInit();
+  uartInit();
   pwmInit();
 
   while (1);

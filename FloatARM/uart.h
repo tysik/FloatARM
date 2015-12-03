@@ -44,10 +44,10 @@
 // A translator of incomming data bytes
 struct MotorsData {
   uint16_t header;
-	float    left_motor_force;
-	float    right_motor_force;
-	float    central_motor_power;
-	uint16_t crc;
+  float    left_motor_force;
+  float    right_motor_force;
+  float    central_motor_power;
+  uint16_t crc;
 } __attribute__((__packed__));
 typedef struct MotorsData MotorsData;
 
