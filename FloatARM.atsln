@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "FloatARM", "FloatARM\FloatARM.cproj", "{862FF85B-E148-4D34-A61A-B99B274DB6EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{862FF85B-E148-4D34-A61A-B99B274DB6EA}.Debug|ARM.ActiveCfg = Debug|ARM
+		{862FF85B-E148-4D34-A61A-B99B274DB6EA}.Debug|ARM.Build.0 = Debug|ARM
+		{862FF85B-E148-4D34-A61A-B99B274DB6EA}.Release|ARM.ActiveCfg = Release|ARM
+		{862FF85B-E148-4D34-A61A-B99B274DB6EA}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

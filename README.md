@@ -1,0 +1,1 @@
+The low level controller for the Float Hovercraft project. The controller is based on ATSAM3X8E microcontroller (Arduino Due). It's purpose is to receive data from on-board computer via UART and produce appropriate PWM signals for the motors ESC's.
