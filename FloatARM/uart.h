@@ -38,19 +38,39 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "sam.h"
-#include "pwm.h"
+#include "float.h"
 
-// A translator of incomming data bytes
-struct MotorsData {
-  uint16_t header;
-  float    left_motor_force;
-  float    right_motor_force;
-  float    central_motor_power;
-  uint16_t crc;
-} __attribute__((__packed__));
-typedef struct MotorsData MotorsData;
+/*
+ * uartInit()
+ * 
+ * Initialize UART pins and interrupts for Arduino Due used by Float.
+ * The baudrate is 115200 b/s. 8N1 - 8 data bits, No parity, 1 stop bit.
+ * Interrupt is invoked when RX buffer is ready.
+ */
+void uartInit();
 
-void     uartInit();
+/*
+ * uartPutchar(uint8_t c)
+ *
+ * Send a single byte over UART.
+ */
+void uartPutChar(uint8_t c);
+
+/*
+ * uartGetChar
+ *
+ * Read a single byte from the UART buffer.
+ */
+ uint8_t uartGetChar();
+ 
+/*
+ * uartCRC(uint8_t* data, uint32_t length)
+ *
+ * Calculate CRC for a given data buffer of specified length.
+ * The two byte CRC algorithm is the same as used by SICK.
+ */
+uint16_t uartCRC(uint8_t* data, uint32_t length);
 
 #endif // UART_H

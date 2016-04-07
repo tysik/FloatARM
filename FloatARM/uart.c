@@ -35,7 +35,7 @@
 
 #include "uart.h"
 
-void uartPutchar(uint8_t c) {
+void uartPutChar(uint8_t c) {
   // Wait for the transmitter to be ready
   while (!(UART->UART_SR & UART_SR_TXRDY));
   
@@ -43,7 +43,7 @@ void uartPutchar(uint8_t c) {
   UART->UART_THR = c;
 }
 
-uint8_t uartGetchar() {
+uint8_t uartGetChar() {
   // Wait for the receiver to be ready
   while (!(UART->UART_SR & UART_SR_RXRDY));
 
@@ -52,7 +52,6 @@ uint8_t uartGetchar() {
 }
 
 uint16_t uartCRC(uint8_t* data, uint32_t length) {
-  // SICK CRC-16
   uint16_t crc = 0;
   uint8_t aux[2] = {0, 0};
 
@@ -73,47 +72,49 @@ uint16_t uartCRC(uint8_t* data, uint32_t length) {
   return crc;
 }
 
+/*
+ * UART_Handler()
+ *
+ * Callback function used by UART interrupt.
+ */
 void UART_Handler() {
   static uint8_t idx = 0;             // Index of received bytes
-  static bool synchronized = true;    // Buffor synchronization
   static MotorsData* motors_data;     // Holder for received data
   static uint8_t rx_buffer[sizeof(MotorsData)];
 	
   // Check if the interrupt source is receive ready
   if (UART->UART_IMR & UART_IMR_RXRDY) {
-    if (synchronized) {
-      // Fill buffer with incoming data
-	    rx_buffer[idx++] = uartGetchar();
-      
-      if (idx >= sizeof(MotorsData)) {
-        // Convert raw data
-        motors_data = (MotorsData*) rx_buffer; 
-
-/*        // Error - desynchronization
-        if (motors_data.header != (uint16_t) 0xAABB) {
-          synchronized = false;
-          idx = 0;
-          uartPutchar('S');
-          return;
-        }
-*/
-        // Check CRC (12 data bytes (+2 to omit header))
-        if (motors_data->crc == uartCRC(rx_buffer+2, 12)) {  
-          
-          // Do sth with the data
-
-          pwmSetDuty(MOTOR_RIGHT, 32000);
-          uartPutchar(0x41);  // ACK
-        }
-        else {
-          pwmSetDuty(MOTOR_RIGHT, 6415);
-          uartPutchar(0x4E);  // NACK
-        }
-      
-        idx = 0;
-      }
+    // Fill buffer with incoming byte
+    rx_buffer[idx] = uartGetChar();
+    
+    // Restart listening when one of the header bytes is incorrect
+    if (idx == 0 && rx_buffer[idx] != 0xAA) {
+      idx = 0;
+      return;
     }
-  }
+    else if (idx == 1 && rx_buffer[idx] != 0xBB) {
+      idx = 0;
+      return;
+    }
+    
+    // Check if the buffer is full
+    if (idx >= sizeof(MotorsData) - 1) {
+      // Convert raw data
+      motors_data = (MotorsData*) rx_buffer;
+
+      // Check CRC (12 data bytes; +2 to omit header)
+      if (motors_data->crc == uartCRC(rx_buffer + 2, 12)) 
+        setMotors(motors_data);
+      else 
+        stopMotors();
+
+      // Restart listening
+      idx = 0;
+      return;
+    }
+    
+    idx++;
+   }
 }
 
 void uartInit() {

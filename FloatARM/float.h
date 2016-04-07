@@ -33,40 +33,67 @@
  * Author: Mateusz Przybyla
  */
 
-#ifndef PWM_H
-#define PWM_H
+#ifndef FLOAT_H
+#define FLOAT_H
 
-#include "sam.h"
+#include "pwm.h"
+
+/* 
+ * struct MotorsData
+ *
+ * The following structure carries incoming data bytes
+ * The structure is packed because we want to keep the
+ * incoming bytes one after another. This allows us to 
+ * use struct pointer directly on a memory adress.
+ * The size of the structure is 16 bytes long.
+ */
+struct MotorsData {
+  uint16_t header;
+  float    left_motor_force;
+  float    right_motor_force;
+  float    center_motor_power;
+  uint16_t crc;
+} __attribute__((__packed__));
+typedef struct MotorsData MotorsData;
+
+/* 
+ * enum MotorsPwmChannels
+ *
+ * The enum holding predefined values of channels used for PWM generation
+ * by Arduino Due used by Float.
+ */
+typedef enum {MOTOR_LEFT = 3, MOTOR_RIGHT = 2, MOTOR_CENTER = 6} MotorsPwmChannels;
 
 /*
- * pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center)
+ * enum MotorsPwmOffsets
  *
- * Initialize PWM peripheral for three channels used by Float. The PWM frequency 
- * is 50 Hz with resolution of 64615 samples per period. 
- * The motor channels are provided by motor_xxx argument. Float uses:
- * PORTC.PIN6 for right motor (PWML2 in peripheral B mode, pin 38 on Arduino Due)
- * PORTC.PIN8 for left motor (PWML3 in peripheral B mode, pin 40 on Arduino Due)
- * PORTC.PIN23 for middle motor (PWML6 in peripheral B mode, pin 7 on Arduino Due)
+ * The enum holding number of samples for each of the motors that needs to be
+ * set in PWM in order to synchronize with ESC but not start the motor.
  */
-void pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center);
+typedef enum {MOTOR_LEFT_OFFSET = 6462, MOTOR_RIGHT_OFFSET = 6462, MOTOR_CENTER_OFFSET = 6462} MotorsPwmOffsets;
+
+/*
+ * enum MotorsPwmScales
+ *
+ * The enum holding the ratio (value from MotorsData) / (number of samples for PWM). 
+ * It allows to calculate the appropriate duty cycle for PWM in order to generate
+ * desired motor motion.
+ */
+typedef enum {MOTOR_LEFT_SCALE = 3000, MOTOR_RIGHT_SCALE = 3000, MOTOR_CENTER_SCALE = 3000} MotorsPwmScales;
+
+/*
+ * setMotors(MotorsData* motors_data)
+ *
+ * Set appropriate PWM signals to comply with desired values 
+ * given by motors_data.
+ */
+void setMotors(MotorsData* motors_data);
 
 /* 
- * pwmSetPeriod(uint16_t channel, uint16_t period)
+ * stopMotors()
  *
- * Set a new period for the PWM assigned at provided channel.
- * The period must be provided in samples (maximal allowed value
- * is 2^16 - 1 = 65535 samples). Note that changing the period 
- * also changes the frequency of PWMs execution.
+ * Turn off all motors.
  */
-void pwmSetPeriod(uint16_t channel, uint16_t period);
+void stopMotors();
 
-/* 
- * pwmSetDuty(uint16_t channel, uint16_t duty)
- *
- * Set a new duty cycle for the PWM assigned at provided channel.
- * The duty cycle must be provided in samples (whole period is 64615
- * samples) and not in percentage of whole period.
- */
-void pwmSetDuty(uint16_t channel, uint16_t duty);
-
-#endif // PWM_H
+#endif // FLOAT_H

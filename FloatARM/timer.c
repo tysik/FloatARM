@@ -33,40 +33,36 @@
  * Author: Mateusz Przybyla
  */
 
-#ifndef PWM_H
-#define PWM_H
+ #include "timer.h"
 
-#include "sam.h"
+void timerInit() {
+  // Pin B.27 (Arduino LED)
+  // Turn on clock for line B
+  PMC->PMC_PCER0 |= ID_PIOB;
 
-/*
- * pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center)
- *
- * Initialize PWM peripheral for three channels used by Float. The PWM frequency 
- * is 50 Hz with resolution of 64615 samples per period. 
- * The motor channels are provided by motor_xxx argument. Float uses:
- * PORTC.PIN6 for right motor (PWML2 in peripheral B mode, pin 38 on Arduino Due)
- * PORTC.PIN8 for left motor (PWML3 in peripheral B mode, pin 40 on Arduino Due)
- * PORTC.PIN23 for middle motor (PWML6 in peripheral B mode, pin 7 on Arduino Due)
- */
-void pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center);
+  // Disable PIO and select peripheral B
+  PIOB->PIO_PDR |= PIO_PB27;
+  PIOB->PIO_ABSR |= PIO_PB27;
 
-/* 
- * pwmSetPeriod(uint16_t channel, uint16_t period)
- *
- * Set a new period for the PWM assigned at provided channel.
- * The period must be provided in samples (maximal allowed value
- * is 2^16 - 1 = 65535 samples). Note that changing the period 
- * also changes the frequency of PWMs execution.
- */
-void pwmSetPeriod(uint16_t channel, uint16_t period);
+  // Enable pull-up
+  PIOB->PIO_PUDR |= PIO_PB27;
 
-/* 
- * pwmSetDuty(uint16_t channel, uint16_t duty)
- *
- * Set a new duty cycle for the PWM assigned at provided channel.
- * The duty cycle must be provided in samples (whole period is 64615
- * samples) and not in percentage of whole period.
- */
-void pwmSetDuty(uint16_t channel, uint16_t duty);
-
-#endif // PWM_H
+  // We need to enable clock for Timer 0
+  PMC->PMC_PCER0 |= ID_TC0;
+    
+  // Channel Mode Register 0
+  TC0->TC_CHANNEL[0].TC_CMR =
+  TC_CMR_WAVE |                   //Wave mode
+  TC_CMR_TCCLKS_TIMER_CLOCK2 |    //MCK / 8
+  TC_CMR_WAVSEL_UP |              //UP mode without automatic trigger on RC Compare
+  TC_CMR_ACPA_TOGGLE |            //RA Compare Effect on TIOA (Toggle)
+  TC_CMR_ACPC_TOGGLE |            //RC Compare Effect on TIOA (Toggle)
+  TC_CMR_CPCTRG;                  //Compare RC Trigger: trigger when counter value matches the RC value
+    
+  //Set compare value in Register A and C
+  TC0->TC_CHANNEL[0].TC_RA = 1000000;         //RA controls the duty cycle
+  TC0->TC_CHANNEL[0].TC_RC = 10000000;         //RC controls the frequency
+    
+  //Enables the clock a software trigger is performed: the counter is reset and the clock is started
+  TC0->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+}

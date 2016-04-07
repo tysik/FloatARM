@@ -33,40 +33,20 @@
  * Author: Mateusz Przybyla
  */
 
-#ifndef PWM_H
-#define PWM_H
+#include "float.h"
 
-#include "sam.h"
+void setMotors(MotorsData* motors_data) {
+  uint16_t left = MOTOR_LEFT_OFFSET + (uint16_t) (motors_data->left_motor_force) * MOTOR_LEFT_SCALE;
+  uint16_t right = MOTOR_RIGHT_OFFSET + (uint16_t) (motors_data->right_motor_force) * MOTOR_RIGHT_SCALE;
+  uint16_t center = MOTOR_CENTER_OFFSET + (uint16_t) (motors_data->center_motor_power) * MOTOR_CENTER_SCALE;
 
-/*
- * pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center)
- *
- * Initialize PWM peripheral for three channels used by Float. The PWM frequency 
- * is 50 Hz with resolution of 64615 samples per period. 
- * The motor channels are provided by motor_xxx argument. Float uses:
- * PORTC.PIN6 for right motor (PWML2 in peripheral B mode, pin 38 on Arduino Due)
- * PORTC.PIN8 for left motor (PWML3 in peripheral B mode, pin 40 on Arduino Due)
- * PORTC.PIN23 for middle motor (PWML6 in peripheral B mode, pin 7 on Arduino Due)
- */
-void pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center);
+  pwmSetDuty(MOTOR_LEFT, left);
+  pwmSetDuty(MOTOR_RIGHT, right);
+  pwmSetDuty(MOTOR_CENTER, center);
+}
 
-/* 
- * pwmSetPeriod(uint16_t channel, uint16_t period)
- *
- * Set a new period for the PWM assigned at provided channel.
- * The period must be provided in samples (maximal allowed value
- * is 2^16 - 1 = 65535 samples). Note that changing the period 
- * also changes the frequency of PWMs execution.
- */
-void pwmSetPeriod(uint16_t channel, uint16_t period);
-
-/* 
- * pwmSetDuty(uint16_t channel, uint16_t duty)
- *
- * Set a new duty cycle for the PWM assigned at provided channel.
- * The duty cycle must be provided in samples (whole period is 64615
- * samples) and not in percentage of whole period.
- */
-void pwmSetDuty(uint16_t channel, uint16_t duty);
-
-#endif // PWM_H
+void stopMotors() {
+  pwmSetDuty(MOTOR_LEFT, MOTOR_LEFT_OFFSET);
+  pwmSetDuty(MOTOR_RIGHT, MOTOR_RIGHT_OFFSET);
+  pwmSetDuty(MOTOR_CENTER, MOTOR_CENTER_OFFSET);
+}

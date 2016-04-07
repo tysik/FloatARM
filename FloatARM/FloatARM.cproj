@@ -158,6 +158,12 @@
     <Compile Include="cmsis\src\system_sam3xa.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="float.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="float.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -165,6 +171,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="pwm.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="timer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="timer.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="uart.c">
