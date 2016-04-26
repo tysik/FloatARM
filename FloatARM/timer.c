@@ -36,33 +36,53 @@
  #include "timer.h"
 
 void timerInit() {
-  // Pin B.27 (Arduino LED)
-  // Turn on clock for line B
-  PMC->PMC_PCER0 |= ID_PIOB;
-
-  // Disable PIO and select peripheral B
-  PIOB->PIO_PDR |= PIO_PB27;
-  PIOB->PIO_ABSR |= PIO_PB27;
-
-  // Enable pull-up
-  PIOB->PIO_PUDR |= PIO_PB27;
-
-  // We need to enable clock for Timer 0
-  PMC->PMC_PCER0 |= ID_TC0;
-    
-  // Channel Mode Register 0
-  TC0->TC_CHANNEL[0].TC_CMR =
-  TC_CMR_WAVE |                   //Wave mode
-  TC_CMR_TCCLKS_TIMER_CLOCK2 |    //MCK / 8
-  TC_CMR_WAVSEL_UP |              //UP mode without automatic trigger on RC Compare
-  TC_CMR_ACPA_TOGGLE |            //RA Compare Effect on TIOA (Toggle)
-  TC_CMR_ACPC_TOGGLE |            //RC Compare Effect on TIOA (Toggle)
-  TC_CMR_CPCTRG;                  //Compare RC Trigger: trigger when counter value matches the RC value
-    
-  //Set compare value in Register A and C
-  TC0->TC_CHANNEL[0].TC_RA = 1000000;         //RA controls the duty cycle
-  TC0->TC_CHANNEL[0].TC_RC = 10000000;         //RC controls the frequency
-    
-  //Enables the clock a software trigger is performed: the counter is reset and the clock is started
+  // Enable TC0 (27 is TC0)
+  PMC->PMC_PCER0 = 1 << 27;
+  
+  // Disable TC clock
+  TC0->TC_CHANNEL->TC_CCR = TC_CCR_CLKDIS;
+  
+  // Disable interrupts
+  TC0->TC_CHANNEL->TC_IDR = 0xFFFFFFFF;
+  
+  // Clear status register
+  TC0->TC_CHANNEL->TC_SR;
+  
+  // Set Mode
+  TC0->TC_CHANNEL->TC_CMR = TC_CMR_CPCTRG | TC_CMR_TCCLKS_TIMER_CLOCK5;
+  
+  // Compare Value
+  TC0->TC_CHANNEL[0].TC_RC = 18000; // 24 = 1 ms; 18000 = 0.750 s
+  
+  // Configure and enable interrupt on RC compare
+  NVIC_EnableIRQ((IRQn_Type) ID_TC0);
+  TC0->TC_CHANNEL->TC_IER = TC_IER_CPCS;
+  
+  // Reset counter (SWTRG) and enable counter clock (CLKEN)
   TC0->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+}
+
+void runHeartBeat() {
+  // Enable IO on Arduino Due LED (L)
+  PIOB->PIO_PER = PIO_PB27;
+  
+  // Set to output
+  PIOB->PIO_OER = PIO_PB27;
+  
+  // Disable pull-up
+  PIOB->PIO_PUDR = PIO_PB27;  
+}
+
+void TC0_Handler() {
+  static int flag = 0;
+  
+  // Read status of TC0
+  TC0->TC_CHANNEL->TC_SR;
+  
+  if (flag) 
+    PIOB->PIO_SODR = PIO_PB27; 
+  else 
+    PIOB->PIO_CODR = PIO_PB27; 
+  
+  flag = !flag;
 }

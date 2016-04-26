@@ -37,18 +37,20 @@
 #include "pwm.h"
 #include "float.h"
 #include "uart.h"
-//#include "timer.h"
+#include "timer.h"
 
 /*
- * The system works in a asynchronous manner. The UART values are received via
- * interrupt procedurs and in-place converted into appropriate PWM signals.
+ * The system works in an asynchronous manner. The UART values are received via
+ * interrupt procedures and in-place converted into appropriate PWM signals.
  */
  int main(void) {
   SystemInit();
+  
   uartInit();
   pwmInit(MOTOR_RIGHT, MOTOR_LEFT, MOTOR_CENTER);
-  //timerInit();
-
+  timerInit();
+  runHeartBeat();
+  
   while (1);
 
   return 0;

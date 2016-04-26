@@ -38,7 +38,20 @@
 
 #include "sam.h"
 
+/*
+ * timerInit()
+ *
+ * Initializes clock for timer on which the Heart Beat 
+ * (LED flashing) is based. 
+ */
 void timerInit();
+
+/*
+ * runHeartBeat()
+ *
+ * Initializes pin with Arduino Due on-board LED for 
+ * Heard Beat blinking.
+ */
 void runHeartBeat();
 
 #endif // TIMER_H

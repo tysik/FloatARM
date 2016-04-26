@@ -35,24 +35,6 @@
 
 #include "pwm.h"
 
-void pwmSetPeriod(uint16_t channel, uint16_t period) {
-  // If the channel is disabled write period to the period register
-  // If the channel is enabled write period to the update period register
-  if ((PWM->PWM_SR & (1 << channel)) == 0)
-    PWM->PWM_CH_NUM[channel].PWM_CPRD = period;
-  else
-    PWM->PWM_CH_NUM[channel].PWM_CPRDUPD = period;
-}
-
-void pwmSetDuty(uint16_t channel, uint16_t duty) {
-  // If the channel is disabled write duty to the duty register
-  // If the channel is enabled write duty to the update duty register
-  if ((PWM->PWM_SR & (1 << channel)) == 0)
-    PWM->PWM_CH_NUM[channel].PWM_CDTY = duty;
-  else
-    PWM->PWM_CH_NUM[channel].PWM_CDTYUPD = duty;
-}
-
 void pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center) {
   // Enable the clock for PORTC line
   PMC->PMC_PCER0 |= 1 << ID_PIOC;
@@ -79,17 +61,35 @@ void pwmInit(uint16_t motor_right, uint16_t motor_left, uint16_t motor_center) {
   PWM->PWM_CH_NUM[motor_right].PWM_CMR  |= PWM_CMR_CPRE_CLKA;
   PWM->PWM_CH_NUM[motor_left].PWM_CMR   |= PWM_CMR_CPRE_CLKA;
   PWM->PWM_CH_NUM[motor_center].PWM_CMR |= PWM_CMR_CPRE_CLKA;
-      
+  
   // Final frequency = 3230769.23077 / 64615 = 50.0002 Hz
   pwmSetPeriod(motor_right, 64615);
   pwmSetPeriod(motor_left, 64615);
   pwmSetPeriod(motor_center, 64615);
-      
+  
   // Set intial duty cycle = ratio of Period to Duty (Duty / Period) * 100 = 10%
   pwmSetDuty(motor_right, 6462);
   pwmSetDuty(motor_left, 6462);
   pwmSetDuty(motor_center, 6462);
-      
+  
   // Enable channels
   PWM->PWM_ENA |= (1 << motor_right) | (1 << motor_left) | (1 << motor_center);
+}
+
+void pwmSetPeriod(uint16_t channel, uint16_t period) {
+  // If the channel is disabled, write period to the period register
+  // If the channel is enabled, write period to the update period register
+  if ((PWM->PWM_SR & (1 << channel)) == 0)
+    PWM->PWM_CH_NUM[channel].PWM_CPRD = period;
+  else
+    PWM->PWM_CH_NUM[channel].PWM_CPRDUPD = period;
+}
+
+void pwmSetDuty(uint16_t channel, uint16_t duty) {
+  // If the channel is disabled, write duty to the duty register
+  // If the channel is enabled, write duty to the update duty register
+  if ((PWM->PWM_SR & (1 << channel)) == 0)
+    PWM->PWM_CH_NUM[channel].PWM_CDTY = duty;
+  else
+    PWM->PWM_CH_NUM[channel].PWM_CDTYUPD = duty;
 }

@@ -47,7 +47,8 @@
  * 
  * Initialize UART pins and interrupts for Arduino Due used by Float.
  * The baudrate is 115200 b/s. 8N1 - 8 data bits, No parity, 1 stop bit.
- * Interrupt is invoked when RX buffer is ready.
+ * Interrupt is invoked when RX buffer is ready. The pins on Arduino are
+ * 0 (RX) and 1 (TX).
  */
 void uartInit();
 

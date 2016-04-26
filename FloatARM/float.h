@@ -87,7 +87,7 @@ typedef enum {MOTOR_LEFT_SCALE = 3000, MOTOR_RIGHT_SCALE = 3000, MOTOR_CENTER_SC
  * Set appropriate PWM signals to comply with desired values 
  * given by motors_data.
  */
-void setMotors(MotorsData* motors_data);
+void setMotors(const MotorsData* motors_data);
 
 /* 
  * stopMotors()
