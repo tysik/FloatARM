@@ -36,9 +36,9 @@
 #include "float.h"
 
 void setMotors(const MotorsData* motors_data) {
-  uint16_t left = MOTOR_LEFT_OFFSET + (uint16_t) (motors_data->left_motor_force) * MOTOR_LEFT_SCALE;
-  uint16_t right = MOTOR_RIGHT_OFFSET + (uint16_t) (motors_data->right_motor_force) * MOTOR_RIGHT_SCALE;
-  uint16_t center = MOTOR_CENTER_OFFSET + (uint16_t) (motors_data->center_motor_power) * MOTOR_CENTER_SCALE;
+  uint16_t left = MOTOR_LEFT_OFFSET + (uint16_t) (motors_data->left_motor_force * MOTOR_LEFT_SCALE);
+  uint16_t right = MOTOR_RIGHT_OFFSET + (uint16_t) (motors_data->right_motor_force * MOTOR_RIGHT_SCALE);
+  uint16_t center = MOTOR_CENTER_OFFSET + (uint16_t) (motors_data->center_motor_power * MOTOR_CENTER_SCALE);
 
   pwmSetDuty(MOTOR_LEFT, left);
   pwmSetDuty(MOTOR_RIGHT, right);

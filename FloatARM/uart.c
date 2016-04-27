@@ -92,7 +92,7 @@ uint16_t uartCRC(uint8_t* data, uint32_t length) {
   uint16_t crc = 0;
   uint8_t aux[2] = {0, 0};
 
-  for (int i = 0; i < length; ++i) {
+  for (uint32_t i = 0; i < length; ++i) {
     aux[1] = aux[0];
     aux[0] = data[i];
 
@@ -140,8 +140,10 @@ void UART_Handler() {
       motors_data = (MotorsData*) rx_buffer;
 
       // Check CRC (12 data bytes; +2 to omit header)
-      if (motors_data->crc == uartCRC(rx_buffer + 2, 12)) 
+      if (motors_data->crc == uartCRC(rx_buffer + 2, 12)) {
+        uartPutChar(0xAC);
         setMotors(motors_data);
+      }
       else 
         stopMotors();
 
