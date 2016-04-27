@@ -133,12 +133,12 @@ void UART_Handler() {
       idx = 0;
       return;
     }
-        
+
     // Check if the buffer is full
     if (idx >= sizeof(MotorsData) - 1) {
       // Convert raw data
       motors_data = (MotorsData*) rx_buffer;
-
+             
       // Check CRC (12 data bytes; +2 to omit header)
       if (motors_data->crc == uartCRC(rx_buffer + 2, 12)) {
         uartPutChar(0xAC);
