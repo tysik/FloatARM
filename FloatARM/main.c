@@ -50,7 +50,7 @@
   pwmInit(MOTOR_RIGHT, MOTOR_LEFT, MOTOR_CENTER);
   timerInit();
   runHeartBeat();
-  
+
   while (1);
 
   return 0;

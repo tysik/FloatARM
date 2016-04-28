@@ -118,18 +118,18 @@ void UART_Handler() {
   static uint8_t idx = 0;             // Index of received bytes
   static MotorsData* motors_data;     // Holder for received data
   static uint8_t rx_buffer[sizeof(MotorsData)];
-
+  
   // Check if the interrupt source is receive ready
   if (UART->UART_IMR & UART_IMR_RXRDY) {
     // Fill buffer with incoming byte
     rx_buffer[idx] = uartGetChar();
     
-    // Restart listening when one of the header bytes is incorrect
-    if (idx == 0 && rx_buffer[idx] != 0xAA) {
+    // Restart listening when one of the header bytes is incorrect (little-endian system assumed)
+    if (idx == 0 && rx_buffer[idx] != 0xBB) {
       idx = 0;
       return;
     }
-    else if (idx == 1 && rx_buffer[idx] != 0xBB) {
+    else if (idx == 1 && rx_buffer[idx] != 0xAA) {
       idx = 0;
       return;
     }
@@ -138,7 +138,7 @@ void UART_Handler() {
     if (idx >= sizeof(MotorsData) - 1) {
       // Convert raw data
       motors_data = (MotorsData*) rx_buffer;
-             
+
       // Check CRC (12 data bytes; +2 to omit header)
       if (motors_data->crc == uartCRC(rx_buffer + 2, 12)) {
         uartPutChar(0xAC);
